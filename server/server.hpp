@@ -6,7 +6,7 @@
 /*   By: mlasrite <mlasrite@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 18:28:22 by mlasrite          #+#    #+#             */
-/*   Updated: 2021/11/19 18:51:59 by mlasrite         ###   ########.fr       */
+/*   Updated: 2021/11/19 19:19:55 by mlasrite         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,6 +14,7 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <unistd.h>
+#include <vector>
 
 class Socket
 {
@@ -57,6 +58,7 @@ public:
 
     int getSockFd() { return this->_sockfd; }
     int getPort() { return this->_port; }
+
 };
 
 void entry();

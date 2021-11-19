@@ -6,7 +6,7 @@
 /*   By: mlasrite <mlasrite@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 18:51:55 by mlasrite          #+#    #+#             */
-/*   Updated: 2021/11/19 18:51:58 by mlasrite         ###   ########.fr       */
+/*   Updated: 2021/11/19 19:27:15 by mlasrite         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,31 @@ void accept_client(Socket sock)
 
 void entry()
 {
-    Socket sock(6556);
-    sock.m_create();
+    int ports[] = {8000,
+                   8001,
+                   8002,
+                   8003};
 
-    sock.m_config();
+    std::vector<Socket>
+        serverSockets;
 
-    sock.m_bind();
+    for (int i = 0; ports[i]; i++)
+        serverSockets.push_back(Socket(ports[i]));
 
-    sock.m_listen();
+    // while (1)
+    // {
+    // }
 
-    accept_client(sock);
+    // Socket sock(6556);
+    // sock.m_create();
 
-    sock.m_close();
+    // sock.m_config();
+
+    // sock.m_bind();
+
+    // sock.m_listen();
+
+    // accept_client(sock);
+
+    // sock.m_close();
 }
