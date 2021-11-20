@@ -66,7 +66,7 @@ void handleClient(int clientSock)
     headers.append(std::to_string(body.size()));
     headers.append("\n\n");
     char *response = strdup((headers + body).c_str());
-    send(clientSock, response, strlen(response), 0);
+    send(clientSock, response, strlen(response), 0); 
 }
 
 void entry()
