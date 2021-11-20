@@ -11,10 +11,54 @@
 /* ************************************************************************** */
 
 #include "server.hpp"
-#define MAX_BUFFER_SIZE 1024 * 20
 
-int handle_client(int fd)
+int ports[] = {8000,
+               8001,
+               8002,
+               8003};
+
+void launchServSocks(std::vector<Socket> &servSocks)
 {
+    for (size_t i = 0; ports[i]; i++)
+        servSocks.push_back(Socket(ports[i]));
+
+    for (size_t i = 0; i < servSocks.size(); i++)
+        servSocks[i].launchSock();
+}
+
+void clean(std::vector<Socket> &servSocks)
+{
+    for (size_t i = 0; i < servSocks.size(); i++)
+        servSocks[i].m_close();
+    servSocks.clear();
+}
+
+void fillSockSet(fd_set &sockSet, std::vector<Socket> &servSocks, std::vector<int> &clientSocks)
+{
+    // reset our set
+    FD_ZERO(&sockSet);
+
+    // add serv sockets
+    for (size_t i = 0; i < servSocks.size(); i++)
+        FD_SET(servSocks[i].getSockFd(), &sockSet);
+
+    // add client sockets
+    for (size_t i = 0; i < clientSocks.size(); i++)
+        FD_SET(clientSocks[i], &sockSet);
+}
+
+void acceptNewClient(Socket servSock, std::vector<int> &clientSocks)
+{
+    int newClient;
+
+    std::cout << "New Client appeared on port: " << servSock.getPort() << "\n";
+    newClient = accept(servSock.getSockFd(), 0, 0);
+    clientSocks.push_back(newClient);
+}
+
+void handleClient(int clientSock)
+{
+    std::cout << "Handle Client: " << clientSock << " !\n";
     time_t t;
     time(&t);
     std::string body = ctime(&t);
@@ -22,59 +66,39 @@ int handle_client(int fd)
     headers.append(std::to_string(body.size()));
     headers.append("\n\n");
     char *response = strdup((headers + body).c_str());
-    char buff[MAX_BUFFER_SIZE];
-    int size;
-
-    size = recv(fd, buff, MAX_BUFFER_SIZE, 0);
-    if (size > 0)
-    {
-        std::cout << buff << std::endl;
-    }
-    int ret = send(fd, response, strlen(response), 0);
-    return ret;
-}
-
-void accept_client(Socket sock)
-{
-    int connfd;
-    connfd = accept(sock.getSockFd(), 0, 0);
-
-    int code = handle_client(connfd);
-    std::cout << code << std::endl;
-    if (code != -1)
-    {
-        close(connfd);
-        accept_client(sock);
-    }
+    send(clientSock, response, strlen(response), 0);
 }
 
 void entry()
 {
-    int ports[] = {8000,
-                   8001,
-                   8002,
-                   8003};
+    std::vector<Socket> servSocks;
+    std::vector<int> clientSocks;
+    fd_set sockSet;
+    int result;
 
-    std::vector<Socket>
-        serverSockets;
+    launchServSocks(servSocks);
+    while (1)
+    {
+        fillSockSet(sockSet, servSocks, clientSocks);
+        result = select(FD_SETSIZE, &sockSet, NULL, NULL, NULL);
+        if (result == -1)
+            std::cout << "Error\n";
+        else if (result > 0)
+        {
+            // test serv sockets
+            for (size_t i = 0; i < servSocks.size(); i++)
+            {
+                if (FD_ISSET(servSocks[i].getSockFd(), &sockSet))
+                    acceptNewClient(servSocks[i], clientSocks);
+            }
 
-    for (int i = 0; ports[i]; i++)
-        serverSockets.push_back(Socket(ports[i]));
-
-    // while (1)
-    // {
-    // }
-
-    // Socket sock(6556);
-    // sock.m_create();
-
-    // sock.m_config();
-
-    // sock.m_bind();
-
-    // sock.m_listen();
-
-    // accept_client(sock);
-
-    // sock.m_close();
+            // Now test the client sockets
+            for (size_t i = 0; i < clientSocks.size(); i++)
+            {
+                if (FD_ISSET(clientSocks[i], &sockSet))
+                    handleClient(clientSocks[i]);
+            }
+        }
+    }
+    clean(servSocks);
 }

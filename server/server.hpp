@@ -15,6 +15,8 @@
 #include <netinet/in.h>
 #include <unistd.h>
 #include <vector>
+#define QUEUE_SIZE 10
+#define MAX_BUFFER_SIZE 1024 * 20
 
 class Socket
 {
@@ -27,27 +29,21 @@ public:
     Socket(int port) : _port(port) {}
     ~Socket() {}
 
-    void m_create()
+    void launchSock()
     {
+        // create socket
         this->_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    }
 
-    void m_config()
-    {
         // assign  Ip, convert port to network byte order and assign local address
         this->_serv_addr.sin_family = AF_INET;
         this->_serv_addr.sin_port = htons(this->_port);
         this->_serv_addr.sin_addr.s_addr = htonl(INADDR_ANY);
-    }
 
-    void m_bind()
-    {
+        // asign address to socket
         bind(this->_sockfd, (struct sockaddr *)&this->_serv_addr, sizeof(this->_serv_addr));
-    }
 
-    void m_listen()
-    {
-        listen(this->_sockfd, 5);
+        // prepare the server for incoming clients requests
+        listen(this->_sockfd, QUEUE_SIZE);
         std::cout << "Server listening on port: " << this->_port << std::endl;
     }
 
@@ -58,7 +54,6 @@ public:
 
     int getSockFd() { return this->_sockfd; }
     int getPort() { return this->_port; }
-
 };
 
 void entry();
