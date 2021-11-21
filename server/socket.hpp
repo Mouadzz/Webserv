@@ -6,7 +6,7 @@
 /*   By: mlasrite <mlasrite@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/20 14:27:13 by mlasrite          #+#    #+#             */
-/*   Updated: 2021/11/20 14:56:57 by mlasrite         ###   ########.fr       */
+/*   Updated: 2021/11/21 12:57:06 by mlasrite         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,10 +23,16 @@ private:
     int _port;
     struct sockaddr_in _serv_addr;
     bool _isServSock;
+    bool _keepAlive;
 
 public:
-    Socket(bool isServ) : _isServSock(isServ) {}
+    Socket(bool isServ) : _isServSock(isServ), _keepAlive(true) {}
     ~Socket() {}
+
+    bool operator==(const Socket &a)
+    {
+        return (a.getSockFd() == this->getSockFd());
+    }
 
     void launchSock()
     {
@@ -49,10 +55,11 @@ public:
         }
     }
 
-    bool isServSock() { return this->_isServSock; }
-    void m_close() { close(this->_sockfd); }
+    bool isServSock() const { return this->_isServSock; }
+    bool keepAlive() const { return this->_keepAlive; }
+    void m_close() const { close(this->_sockfd); }
     void setPort(int port) { this->_port = port; }
     void setSockFd(int fd) { this->_sockfd = fd; }
-    int getSockFd() { return this->_sockfd; }
-    int getPort() { return this->_port; }
+    int getSockFd() const { return this->_sockfd; }
+    int getPort() const { return this->_port; }
 };
