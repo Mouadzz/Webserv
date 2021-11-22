@@ -6,7 +6,7 @@
 /*   By: mlasrite <mlasrite@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2021/11/19 18:51:55 by mlasrite          #+#    #+#             */
-/*   Updated: 2021/11/21 12:41:28 by mlasrite         ###   ########.fr       */
+/*   Updated: 2021/11/22 12:44:19 by mlasrite         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,5 +28,7 @@ int entry()
         server.performSelect();
     }
     server.clean();
+
+    system("leaks Webserv");
     return 0;
 }
